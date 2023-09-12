@@ -168,11 +168,13 @@ namespace Kanna_Blacklist_Network
 
         private static async Task ClientOnReady()
         {
-            Console.Title = $"Kanna's Blacklist Network: {_client.CurrentUser.GlobalName ?? _client.CurrentUser.Username}";
+            Console.Title = $"Kanna Blacklist Network: {_client.CurrentUser.GlobalName ?? _client.CurrentUser.Username}";
 
-            SendLog(LogSeverity.Info, "Startup", $"Welcome To Kanna's Blacklist Network - {_client.CurrentUser.GlobalName ?? _client.CurrentUser.Username}, You Currently Have {Config.InternalConfig.BlacklistedUsers.Count} Blacklisted Users.");
+            SendLog(LogSeverity.Info, "Startup", $"Welcome To Kanna Blacklist Network - {_client.CurrentUser.GlobalName ?? _client.CurrentUser.Username}, You Currently Have {Config.InternalConfig.BlacklistedUsers.Count} Blacklisted Users.");
 
             Console.WriteLine("Created By Kanna. Donate: https://paypal.me/KannaVR");
+
+            await _client.SetCustomStatusAsync("Kanna Blacklist Network");
         }
 
         private static async Task Log(LogMessage msg)
