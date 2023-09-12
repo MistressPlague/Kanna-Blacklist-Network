@@ -3,8 +3,7 @@ A blacklist system for discord, where only the bot owner can issue blacklist add
 
 .NET 7, Cross-Platform. Ideally run locally, as to blacklist someone as the bot owner, you need console-level access.
 
-# Discord
-[Link](https://discord.gg/tk6pPEhUQD)
+# [Discord](https://discord.gg/tk6pPEhUQD)
 
 # Public Kanna Blacklist Network Instances
 | Owner | Blacklist Target | Link |
