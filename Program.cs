@@ -168,9 +168,13 @@ namespace Kanna_Blacklist_Network
 
         private static async Task ClientOnReady()
         {
+            Console.Clear();
+
             Console.Title = $"Kanna Blacklist Network: {_client.CurrentUser.GlobalName ?? _client.CurrentUser.Username}";
 
-            SendLog(LogSeverity.Info, "Startup", $"Welcome To Kanna Blacklist Network - {_client.CurrentUser.GlobalName ?? _client.CurrentUser.Username}, You Currently Have {Config.InternalConfig.BlacklistedUsers.Count} Blacklisted Users.");
+            SendLog(LogSeverity.Info, "Ready", $"Welcome To Kanna Blacklist Network - {_client.CurrentUser.GlobalName ?? _client.CurrentUser.Username}, You Currently Have {Config.InternalConfig.BlacklistedUsers.Count} Blacklisted Users.");
+
+            SendLog(LogSeverity.Info, "Ready", $"Your Instance Is In {_client.Guilds.Count} Servers: {string.Join(", ", _client.Guilds.Select(o => o.Name))}");
 
             Console.WriteLine("Created By Kanna. Donate: https://paypal.me/KannaVR");
 
@@ -201,7 +205,7 @@ namespace Kanna_Blacklist_Network
                     break;
             }
 
-            Console.WriteLine($"[{DateTime.Now:hh:mm:ss:fff tt}] {msg.Source}: {msg.Message}{msg.Exception}");
+            Console.WriteLine($"[{DateTime.Now:hh:mm:ss:fff tt}] [{msg.Source}]: {msg.Message}{msg.Exception}");
 
             Console.ForegroundColor = ConsoleColor.White;
         }
