@@ -6,7 +6,7 @@ A blacklist system for discord, where only the bot owner can issue blacklist add
 # [Discord](https://discord.gg/tk6pPEhUQD)
 
 # Public Kanna Blacklist Network Instances
-| Owner | Blacklist Target | Link |
+| Owner | Blacklist Targets | Link |
 | ------------- |:-------------:| -----:|
 | Kanna | Rippers, Extremely Toxic People | [Link](https://discord.com/api/oauth2/authorize?client_id=1150992069905621127&permissions=2147483652&scope=bot)
 
