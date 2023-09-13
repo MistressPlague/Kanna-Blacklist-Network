@@ -62,27 +62,33 @@ namespace InteractionFramework.Modules
         {
             await RespondAsync("Please proceed in the console.", ephemeral: true);
 
-            Program.SendLog(LogSeverity.Warning, "BlacklistUser", "You Just Triggered The BlacklistUser Command. Enter The UserID To Blacklist Now.");
-            var userid = ulong.Parse(Console.ReadLine());
+            Program.SendLog(LogSeverity.Warning, "BlacklistUser", "You Just Triggered The BlacklistUser Command. Enter The UserIDs To Blacklist Now. IDs Can Be Comma Serparated");
 
-            if (!Program.Config.InternalConfig.BlacklistedUsers.Contains(userid))
-            {
-                Program.Config.InternalConfig.BlacklistedUsers.Add(userid);
-            }
+            var text = Console.ReadLine();
 
-            foreach (var guild in Program._client.Guilds)
+            var userids = text.Split(", ").Select(ulong.Parse);
+
+            foreach (var userid in userids)
             {
-                try
+                if (!Program.Config.InternalConfig.BlacklistedUsers.Contains(userid))
                 {
-                    if (guild.GetUser(userid) is var user && user != null && user.GuildPermissions.Has(GuildPermission.Administrator))
-                    {
-                        continue; // Ignore blacklisted user if admin, as we likely can't ban them anyway. We also can't assume the morals of said server in this rare case.
-                    }
-
-                    await guild.AddBanAsync(userid, 1, "Banned Via Kanna Blacklist Network By Bot Owner.");
+                    Program.Config.InternalConfig.BlacklistedUsers.Add(userid);
                 }
-                catch // Ignore any and all errors, blindly.
+
+                foreach (var guild in Program._client.Guilds)
                 {
+                    try
+                    {
+                        if (guild.GetUser(userid) is var user && user != null && user.GuildPermissions.Has(GuildPermission.Administrator))
+                        {
+                            continue; // Ignore blacklisted user if admin, as we likely can't ban them anyway. We also can't assume the morals of said server in this rare case.
+                        }
+
+                        await guild.AddBanAsync(userid, 1, "Banned Via Kanna Blacklist Network By Bot Owner.");
+                    }
+                    catch // Ignore any and all errors, blindly.
+                    {
+                    }
                 }
             }
 
