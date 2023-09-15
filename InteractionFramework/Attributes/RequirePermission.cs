@@ -16,7 +16,8 @@ namespace InteractionFramework.Attributes
             switch (context.Client.TokenType)
             {
                 case TokenType.Bot:
-                    if (!Program.Config.InternalConfig.CommandsPermitted.Contains(context.User.Id))
+                    var application = await context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
+                    if (!Program.Config.InternalConfig.CommandsPermitted.Contains(context.User.Id) && context.User.Id != application.Owner.Id)
                         return PreconditionResult.FromError(ErrorMessage ?? "Command can only be run by permitted users.");
                     return PreconditionResult.FromSuccess();
                 default:
