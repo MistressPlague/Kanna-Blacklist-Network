@@ -16,10 +16,42 @@ namespace Kanna_Blacklist_Network
     {
         public class Configuration
         {
-            public List<ulong> BlacklistedUsers = new List<ulong>();
+            public List<BlacklistedUser> BlacklistedUsers = new List<BlacklistedUser>();
+            public List<ReportedUser> ReportedUsers = new List<ReportedUser>();
+
+            public List<ulong> CommandsPermitted = new List<ulong>();
         }
 
-        public static ConfigLib<Configuration> Config = new ConfigLib<Configuration>(Environment.CurrentDirectory + "\\Config.json");
+        public class ConfigEntry
+        {
+            public string Time;
+        }
+
+        public class BlacklistedUser : ConfigEntry
+        {
+            public ulong UserID;
+            public string Reason;
+        }
+
+        public class ReportedUser : ConfigEntry
+        {
+            public ulong UserID;
+            public List<Report> ReportedReasons = new List<Report>();
+        }
+
+        public class Report
+        {
+            public string Time;
+            public string ReportedBy;
+            public string Reason;
+        }
+
+        public static string GenerateTimestamp()
+        {
+            return DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt");
+        }
+
+        public static ConfigLib<Configuration> Config = new ConfigLib<Configuration>(Environment.CurrentDirectory + "\\NewConfig.json"); // File name changed to prevent error on startup due to config type changes
 
         public static DiscordSocketClient _client;
 
@@ -135,11 +167,11 @@ namespace Kanna_Blacklist_Network
 
         private async Task ClientOnUserJoined(SocketGuildUser arg)
         {
-            if (Config.InternalConfig.BlacklistedUsers.Contains(arg.Id))
+            if (Config.InternalConfig.BlacklistedUsers.FirstOrDefault(o => o.UserID == arg.Id) is var user && user != null)
             {
                 try
                 {
-                    await arg.Guild.AddBanAsync(arg.Id, 1, "Banned Via Kanna Blacklist Network By Bot Owner.");
+                    await arg.Guild.AddBanAsync(arg.Id, 1, $"Banned Via Kanna Blacklist Network ({Program._client.CurrentUser.Username}) By Bot Owner. - {user.Reason}");
                 }
                 catch // Ignore any and all errors, blindly.
                 {
@@ -149,16 +181,16 @@ namespace Kanna_Blacklist_Network
 
         private async Task ClientOnJoinedGuild(SocketGuild guild)
         {
-            foreach (var userid in Config.InternalConfig.BlacklistedUsers)
+            foreach (var user in Config.InternalConfig.BlacklistedUsers)
             {
                 try
                 {
-                    if (guild.GetUser(userid) is var user && user != null && user.GuildPermissions.Has(GuildPermission.Administrator))
+                    if (guild.GetUser(user.UserID) is var founduser && founduser != null && founduser.GuildPermissions.Has(GuildPermission.Administrator))
                     {
                         continue; // Ignore blacklisted user if admin, as we likely can't ban them anyway. We also can't assume the morals of said server in this rare case.
                     }
 
-                    await guild.AddBanAsync(userid, 1, "Banned Via Kanna Blacklist Network By Bot Owner.");
+                    await guild.AddBanAsync(user.UserID, 1, $"Banned Via Kanna Blacklist Network ({Program._client.CurrentUser.Username}) By Bot Owner. - {user.Reason}");
                 }
                 catch // Ignore any and all errors, blindly.
                 {

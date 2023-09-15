@@ -5,24 +5,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Kanna_Blacklist_Network;
 
 namespace InteractionFramework.Attributes
 {
-    public class RequireUserIDsAttribute : PreconditionAttribute
+    public class RequirePermission : PreconditionAttribute
     {
-        public ulong[] userIDs;
-        public RequireUserIDsAttribute(params ulong[] userIDs)
-        {
-            this.userIDs = userIDs;
-        }
-
         public override async Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context, ICommandInfo commandInfo, IServiceProvider services)
         {
             switch (context.Client.TokenType)
             {
                 case TokenType.Bot:
-                    if (!userIDs.Contains(context.User.Id))
-                        return PreconditionResult.FromError(ErrorMessage ?? "Command can only be run by allowed users.");
+                    if (!Program.Config.InternalConfig.CommandsPermitted.Contains(context.User.Id))
+                        return PreconditionResult.FromError(ErrorMessage ?? "Command can only be run by permitted users.");
                     return PreconditionResult.FromSuccess();
                 default:
                     return PreconditionResult.FromError($"{nameof(RequireOwnerAttribute)} is not supported by this {nameof(TokenType)}.");
