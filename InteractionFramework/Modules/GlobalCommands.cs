@@ -80,7 +80,7 @@ namespace InteractionFramework.Modules
             if (match == null)
             {
                 var report = Program.Config.InternalConfig.ReportedUsers.FirstOrDefault(o => o.UserID == userid);
-
+                
                 if (report != null)
                 {
                     await RespondAsync($"Nope! Not Blacklisted, But They Were Reported! - Time First Reported: {report.Time}, Reports: {string.Join("\r\n", report.ReportedReasons.Select(a => $"[{a.Time} {a.ReportedBy}: {a.Reason}]"))}", ephemeral: true);
@@ -124,11 +124,11 @@ namespace InteractionFramework.Modules
         {
             await RespondAsync("Please proceed in the console.", ephemeral: true);
 
-            Program.SendLog(LogSeverity.Warning, "BlacklistUser", "You Just Triggered The BlacklistUser Command. Enter The UserIDs To Blacklist Now. IDs Can Be Comma Serparated, With Reasons After A \":\"; For Example 000000,11111 Works, So Would 000000:reason here,11111:other reason here.");
+            Program.SendLog(LogSeverity.Warning, "BlacklistUser", "You Just Triggered The BlacklistUser Command. Enter The UserIDs To Blacklist Now. IDs Can Be Serparated With \";\", With Reasons After A \":\"; For Example 000000;11111 Works, So Would 000000:reason here;11111:other reason here.");
 
             var text = Console.ReadLine();
 
-            var splits = text.Split(", ");
+            var splits = text.Split(";");
 
             var users = new List<(ulong, string)>();
 
