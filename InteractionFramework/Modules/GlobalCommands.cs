@@ -130,7 +130,7 @@ namespace InteractionFramework.Modules
 
             var text = Console.ReadLine();
 
-            if (!Regex.IsMatch(text, @"^\d+(?::\w+)?(?:;\d+(?::\w+)?)*$"))
+            if (!Regex.IsMatch(text, @"^\d{18,}(?::(\w| )+)?(?:;\d+(?::(\w| )+)?)*$"))
             {
                 Program.SendLog(LogSeverity.Error, "BlacklistUser", "Please Type Using The Correct Format.");
                 goto Retry;
