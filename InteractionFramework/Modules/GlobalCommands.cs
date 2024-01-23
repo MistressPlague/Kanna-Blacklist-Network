@@ -102,8 +102,8 @@ namespace InteractionFramework.Modules
         [RequireContext(ContextType.Guild)]
         public async Task ReportUser()
         {
-            var mb = new ModalBuilder().WithTitle("Report User").WithCustomId("reportuser").AddTextInput("User ID", "userid", TextInputStyle.Short, "000000000000000000").AddTextInput("Reason", "reason", TextInputStyle.Paragraph, "Please be descriptive! Link evidence if any!");
-
+            var mb = new ModalBuilder().WithTitle("Report User").WithCustomId("reportuser").AddTextInput("User ID", "userid", TextInputStyle.Short, "000000000000000000", 18, required: true).AddTextInput("Reason", "reason", TextInputStyle.Paragraph, "Please be descriptive! Link evidence if any!", 3, required: true);
+            
             await RespondWithModalAsync(mb.Build());
         }
 

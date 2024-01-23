@@ -45,11 +45,16 @@ namespace InteractionFramework
                 // Create an execution context that matches the generic type parameter of your InteractionModuleBase<T> modules.
                 var context = new SocketInteractionContext(_client, interaction);
 
+                if (interaction is IModalInteraction)
+                {
+                    return;
+                }
+
                 // Execute the incoming command.
                 var result = await _handler.ExecuteCommandAsync(context, _services);
 
                 if (!result.IsSuccess)
-                    switch (result.Error)
+                    switch (result.Error) // in case of implementing specific ones in the future.
                     {
                         default:
                             Program.SendLog(LogSeverity.Error, "CMD", ($"{result.Error} {result.ErrorReason}"));
