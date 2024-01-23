@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+.idea/.idea.Kanna Blacklist Network/.idea/vcs.xml
+.idea/.idea.Kanna Blacklist Network/.idea/indexLayout.xml
+.idea/.idea.Kanna Blacklist Network/.idea/encodings.xml
+.idea/.idea.Kanna Blacklist Network/.idea/discord.xml
+.idea/.idea.Kanna Blacklist Network/.idea/.gitignore
