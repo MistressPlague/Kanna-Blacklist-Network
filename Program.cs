@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using System;
 using System.Reflection;
+using InteractionFramework.Modules;
 using TextCopy;
 
 namespace Kanna_Blacklist_Network
@@ -86,6 +87,7 @@ namespace Kanna_Blacklist_Network
             _client.Ready += ClientOnReady;
             _client.JoinedGuild += ClientOnJoinedGuild;
             _client.UserJoined += ClientOnUserJoined;
+            _client.ModalSubmitted += ClientOnModalSubmitted;
 
             // Here we can initialize the service that will register and execute our commands
             await _services.GetRequiredService<InteractionHandler>()
@@ -118,6 +120,16 @@ namespace Kanna_Blacklist_Network
 
             // Block this task until the program is closed.
             await Task.Delay(Timeout.Infinite);
+        }
+
+        private async Task ClientOnModalSubmitted(SocketModal arg)
+        {
+            if (arg.Data.CustomId == "reportuser")
+            {
+                await GlobalCommands.OnReportSubmitted(arg);
+            }
+
+            await arg.RespondAsync("Sent!", ephemeral: true);
         }
 
         static string ReadHiddenInput()

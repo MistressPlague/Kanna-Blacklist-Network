@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Discord;
 using Discord.Interactions;
 using Discord.Net.Extensions.Interactions;
+using Discord.WebSocket;
 using InteractionFramework.Attributes;
 using Kanna_Blacklist_Network;
 
@@ -32,12 +33,12 @@ namespace InteractionFramework.Modules
         {
             var Commands = new List<string>();
 
-            foreach (var GuildCommand in InteractionHandler._handler.SlashCommands.Where(o => (o.Module.Attributes.FirstOrDefault(a => a is RequireGuilds) as RequireGuilds)?.GuildsIds.Contains(Context.Guild.Id) ?? false))
+            foreach (var GuildCommand in InteractionHandler._handler.SlashCommands.Where(o => (o.Attributes.FirstOrDefault(a => a is RequireGuilds) as RequireGuilds)?.GuildsIds.Contains(Context.Guild.Id) ?? false))
             {
                 Commands.Add($"[Guild] `/{GuildCommand.Name}`: {GuildCommand.Description}");
             }
 
-            foreach (var GlobalCommand in InteractionHandler._handler.SlashCommands.Where(o => o.Module.Attributes.All(a => a is not RequireGuilds)))
+            foreach (var GlobalCommand in InteractionHandler._handler.SlashCommands.Where(o => o.Attributes.All(a => a is not RequireGuilds)))
             {
                 Commands.Add($"[Global] `/{GlobalCommand.Name}`: {GlobalCommand.Description}");
             }
@@ -49,7 +50,7 @@ namespace InteractionFramework.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Donate()
         {
-            await RespondAsync("To Donate To The Developer Of This Bot, Use https://paypal.me/KannaVR - Note Only \"Friends And Family\" Payments Are Accepted. Goods And Services Are Auto-Refunded Within 24h.");
+            await RespondAsync("To Donate To The Developer Of Kanna Blacklist Network, Use https://paypal.me/KannaVR - Note Only \"Friends And Family\" Payments Are Accepted. Goods And Services Are Auto-Refunded Within 24h.");
         }
 
         [SlashCommand("permittousecommands", "Permits a specified user ID to use commands such as isblacklisted.", false, RunMode.Async)]
@@ -73,7 +74,7 @@ namespace InteractionFramework.Modules
 
         [SlashCommand("isblacklisted", "Checks if a specified user ID is blacklisted.", false, RunMode.Async)]
         [RequireContext(ContextType.Guild)]
-        [Attributes.RequirePermission]
+        [RequirePermission]
         public async Task IsBlacklisted(ulong userid)
         {
             var match = Program.Config.InternalConfig.BlacklistedUsers.FirstOrDefault(o => o.UserID == userid);
@@ -99,25 +100,33 @@ namespace InteractionFramework.Modules
 
         [SlashCommand("reportuser", "Report a user to the owner of this bot. Whether they get blacklisted is up to the bot owner only.", false, RunMode.Async)]
         [RequireContext(ContextType.Guild)]
-        public async Task ReportUser(ulong userid, string reason)
+        public async Task ReportUser()
         {
-            await RespondAsync("Sent!", ephemeral: true);
+            var mb = new ModalBuilder().WithTitle("Report User").WithCustomId("reportuser").AddTextInput("User ID", "userid", TextInputStyle.Short, "000000000000000000").AddTextInput("Reason", "reason", TextInputStyle.Paragraph, "Please be descriptive! Link evidence if any!");
 
-            Program.SendLog(LogSeverity.Warning, "Reported User", $"{Context.User} Sent A Report For UserID: {userid}: {reason}");
-
-            if (Program.Config.InternalConfig.ReportedUsers.FindIndex(o => o.UserID == userid) is var index && index != -1)
-            {
-                if (Program.Config.InternalConfig.ReportedUsers[index].ReportedReasons.All(p => p.Reason != reason))
-                {
-                    Program.Config.InternalConfig.ReportedUsers[index].ReportedReasons.Add(new Program.Report() { Time = Program.GenerateTimestamp(), ReportedBy = Context.User.ToString(), Reason = reason });
-                }
-            }
-            else
-            {
-                Program.Config.InternalConfig.ReportedUsers.Add(new Program.ReportedUser() { Time = Program.GenerateTimestamp(), UserID = userid, ReportedReasons = new List<Program.Report> { new Program.Report() { Time = Program.GenerateTimestamp(), ReportedBy = Context.User.ToString(), Reason = reason } } });
-            }
+            await RespondWithModalAsync(mb.Build());
         }
 
+        public static async Task OnReportSubmitted(SocketModal modal)
+        {
+            // double check in case future changes make weewoo
+            if (modal.Data.CustomId == "reportuser" && ulong.TryParse(modal.Data.Components.First(o => o.CustomId == "userid").Value, out var userid))
+            {
+                var reason = modal.Data.Components.First(o => o.CustomId == "reason").Value;
+                
+                Program.SendLog(LogSeverity.Warning, "Reported User", $"{modal.User} Sent A Report For UserID: {userid}: {reason}");
+
+                if (Program.Config.InternalConfig.ReportedUsers.FindIndex(o => o.UserID == userid) is var index && index != -1)
+                {
+                    Program.Config.InternalConfig.ReportedUsers[index].ReportedReasons.Add(new Program.Report() { Time = Program.GenerateTimestamp(), ReportedBy = modal.User.ToString(), Reason = reason });
+                }
+                else
+                {
+                    Program.Config.InternalConfig.ReportedUsers.Add(new Program.ReportedUser() { Time = Program.GenerateTimestamp(), UserID = userid, ReportedReasons = new List<Program.Report> { new Program.Report() { Time = Program.GenerateTimestamp(), ReportedBy = modal.User.ToString(), Reason = reason } } });
+                }
+            }
+        }
+        
         [SlashCommand("blacklistuser", "Blacklists a user on your Kanna Blacklist Network. This will effect all servers this is in.", false, RunMode.Async)]
         [Attributes.RequireOwner]
         [RequireContext(ContextType.Guild)]
@@ -163,6 +172,10 @@ namespace InteractionFramework.Modules
                 if (Program.Config.InternalConfig.BlacklistedUsers.All(p => p.UserID != user.Item1))
                 {
                     Program.Config.InternalConfig.BlacklistedUsers.Add(new Program.BlacklistedUser() { Time = Program.GenerateTimestamp(), UserID = user.Item1, Reason = user.Item2});
+                }
+                else
+                {
+                    continue;
                 }
 
                 foreach (var guild in Program._client.Guilds)
